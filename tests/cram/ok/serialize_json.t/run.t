@@ -31,14 +31,14 @@ Le fichier produit est un JSON du format mlang-mir-json, version 1.
   > kinds = [i['kind'] for i in regle['prog']]
   > assert kinds == ['affectation'], kinds
   > aff = regle['prog'][0]
-  > assert aff['formula']['type'] == 'single'
-  > e = aff['formula']['decl']['expr']
+  > assert aff['formula']['value']['type'] == 'single'
+  > e = aff['formula']['value']['decl']['expr']
   > assert e['kind'] == 'si_expression', e['kind']
   > assert e['cond']['kind'] == 'comparison' and e['cond']['op']['value'] == 'gt'
-  > alors = e['then']['value']
+  > alors = e['then']
   > assert alors['kind'] == 'binop' and alors['op']['value'] == 'add'
-  > assert alors['lhs']['value']['kind'] == 'funcall'
-  > assert alors['lhs']['value']['func']['value'] == 'arr'
+  > assert alors['lhs']['kind'] == 'funcall'
+  > assert alors['lhs']['func']['value'] == 'arr'
   > # la vérif 1 : condition sur variable saisie, erreur portée
   > verif = p['targets']['a_verif_1']
   > vi = verif['prog'][0]
