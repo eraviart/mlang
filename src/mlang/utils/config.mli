@@ -88,6 +88,9 @@ val execution_mode : execution_mode ref
 
 val no_nondet_display : bool ref
 
+(* F11/2 : fichier de sérialisation JSON de la MIR ; vide = désactivé. *)
+val serialize_json_output : string ref
+
 val set_opts :
   files:string list ->
   application_names:string list ->
@@ -110,4 +113,5 @@ val set_opts :
   m_clean_calls:bool ->
   dgfip_options:string list option ->
   no_nondet_display:bool ->
+  serialize_json:string option ->
   [ `Displayed_dgfip_help | `Error of string | `Run ]

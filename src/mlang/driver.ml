@@ -167,6 +167,15 @@ let driver () =
     let m_program = Validator.proceed !Config.mpp_function m_program in
     let m_program = Mast_to_mir.translate m_program in
     let m_program = Mir.expand_functions m_program in
+    (* F11/2 : sérialisation JSON de la MIR exécutable, puis sortie sans
+       aucun calcul. L'exécution de contrôle reste l'interpréteur Mlang. *)
+    if !Config.serialize_json_output <> "" then begin
+      Cli.debug_print "Serializing the MIR program to %s..."
+        !Config.serialize_json_output;
+      Mir_json.write_program !Config.serialize_json_output m_program;
+      Cli.debug_print "Serialization done.";
+      exit 0
+    end;
     Cli.debug_print "Creating combined program suitable for execution...";
     match !Config.execution_mode with
     | SingleTest test -> run_single_test m_program test
@@ -186,12 +195,12 @@ let set_opts (files : string list) (application_names : string list)
     (precision : string option) (roundops : string option)
     (comparison_error_margin : float option) (income_year : int)
     (m_clean_calls : bool) (dgfip_options : string list option)
-    (no_nondet_display : bool) =
+    (no_nondet_display : bool) (serialize_json : string option) =
   Config.set_opts ~files ~application_names ~without_dgfip_m ~debug
     ~var_info_debug ~display_time ~print_cycles ~backend ~output ~run_tests
     ~dgfip_test_filter ~run_test ~mpp_function ~optimize_unsafe_float ~precision
     ~roundops ~comparison_error_margin ~income_year ~m_clean_calls
-    ~dgfip_options ~no_nondet_display
+    ~dgfip_options ~no_nondet_display ~serialize_json
 
 let run () =
   let eval_cli =

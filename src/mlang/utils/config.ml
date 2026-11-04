@@ -44,6 +44,9 @@ let display_time = ref false
 
 let output_file = ref ""
 
+(* F11/2 : fichier de sérialisation JSON de la MIR ; vide = désactivé. *)
+let serialize_json_output = ref ""
+
 let optimize_unsafe_float = ref false
 
 let m_clean_calls = ref false
@@ -78,7 +81,7 @@ let set_all_arg_refs (files_ : files) applications_ (without_dgfip_m_ : bool)
     (value_sort_ : value_sort) (round_ops_ : round_ops) (backend_ : backend)
     (dgfip_test_filter_ : bool) (mpp_function_ : string)
     (dgfip_flags_ : Dgfip_options.flags) (execution_mode_ : execution_mode)
-    (no_nondet_display_ : bool) =
+    (no_nondet_display_ : bool) (serialize_json_output_ : string option) =
   source_files := files_;
   application_names := applications_;
   without_dgfip_m := without_dgfip_m_;
@@ -98,13 +101,20 @@ let set_all_arg_refs (files_ : files) applications_ (without_dgfip_m_ : bool)
   mpp_function := mpp_function_;
   dgfip_flags := dgfip_flags_;
   no_nondet_display := no_nondet_display_;
-  match output_file_ with
-  | None -> ()
-  | Some o -> (
-      output_file := o;
-      match comparison_error_margin_ with
-      | None -> ()
-      | Some m -> comparison_error_margin := m)
+  (* NB : parenthèses obligatoires — sans elles, les instructions suivantes
+     sont aspirées dans la branche Some du match (extension maximale des
+     bras) et ne s'exécutent que si --output est fourni. *)
+  (match output_file_ with
+   | None -> ()
+   | Some o -> (
+       output_file := o;
+       match comparison_error_margin_ with
+       | None -> ()
+       | Some m -> comparison_error_margin := m));
+  (match serialize_json_output_ with
+   | None -> ()
+   | Some o -> serialize_json_output := o);
+  ()
 
 let process_dgfip_options (backend : backend) ~(application_names : string list)
     (dgfip_options : string list option) =
@@ -138,7 +148,7 @@ let set_opts ~(files : string list) ~(application_names : string list)
     ~(precision : string option) ~(roundops : string option)
     ~(comparison_error_margin : float option) ~(income_year : int)
     ~(m_clean_calls : bool) ~(dgfip_options : string list option)
-    ~(no_nondet_display : bool) :
+    ~(no_nondet_display : bool) ~(serialize_json : string option) :
     [ `Run | `Displayed_dgfip_help | `Error of string ] =
   let exception INTERNAL_FAIL of string in
   let exception DGFIP_HELP in
@@ -216,7 +226,7 @@ let set_opts ~(files : string list) ~(application_names : string list)
       var_info_debug display_time print_cycles output optimize_unsafe_float
       m_clean_calls comparison_error_margin income_year value_sort round_ops
       backend dgfip_test_filter mpp_function dgfip_flags execution_mode
-      no_nondet_display;
+      no_nondet_display serialize_json;
     `Run
   with
   | INTERNAL_FAIL m -> `Error m
