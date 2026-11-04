@@ -477,9 +477,13 @@ let json_cadre_cible (t : (Var.t, Error.t) target) : Yojson.Basic.t =
   in
   List.iter
     (fun ((v : Var.t), genre, p) ->
-      let i = Com.Var.loc_idx v in
-      let l = try Hashtbl.find table i with Not_found -> [] in
-      Hashtbl.replace table i ((v, genre, p) :: l))
+      (* Seules les références vivent dans la frame : les arguments d'une
+         fonction sont des variables temporaires (mast_to_mir.ml:239-241,
+         validator.ml:2399) et n'occupent aucun emplacement de ref. *)
+      if Com.Var.is_ref v then (
+        let i = Com.Var.loc_idx v in
+        let l = try Hashtbl.find table i with Not_found -> [] in
+        Hashtbl.replace table i ((v, genre, p) :: l)))
     (liaisons_cible t);
   let emplacements =
     Hashtbl.fold (fun i l acc -> (i, l) :: acc) table []
